@@ -4,7 +4,10 @@ var MessageSchema = new mongoose.Schema({
   id: { type: String, required: true, index: true },
 
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  senderID: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+
   recipients: [ { type: mongoose.Schema.Types.ObjectId, ref: 'User' } ],
+  recipientIDs: [ { type: String } ],
 
   text: { type: String },
 

@@ -25,7 +25,6 @@ ChatClient
     * sendVideo
     * save
     * restore
-    * createAccount
 
   * events:
     * TODO
@@ -35,6 +34,7 @@ ChatBot(client, state, opts)
   * stop
 
 ChatBotServer
+  * listen(port) // webhooks
 
 Models:
   * User
@@ -69,7 +69,6 @@ var bot = new TestBot(client, state)
 - [Hubot](https://github.com/github/hubot)
 - [Hubot Scripts](https://github.com/github/hubot-scripts)
 - [Superscript](https://github.com/silentrob/superscript)
-
 
 ### License
 
