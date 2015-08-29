@@ -48,7 +48,7 @@ Clients:
   * TelegramClient
 
 Bots:
-  * 
+  * Superscript
   * Mirror
   * Giphy
   * Eliza
@@ -63,7 +63,14 @@ var state = new ChatBotState()
 
 var bot = new TestBot(client, state)
 
+### Links
+
+- [Telegram Bot API](https://core.telegram.org/bots/api)
+- [Hubot](https://github.com/github/hubot)
+- [Hubot Scripts](https://github.com/github/hubot-scripts)
+- [Superscript](https://github.com/silentrob/superscript)
+
 
 ### License
 
-MIT. Copyright (c) [Travis Fischer](https://makesnaps.com).
+MIT. Copyright (c) [Snaps](https://makesnaps.com).
