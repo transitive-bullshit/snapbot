@@ -15,7 +15,9 @@ function TestBot (client, state, opts) {
 }
 
 TestBot.prototype.start = function () {
+  // TODO
 }
 
 TestBot.prototype.stop = function () {
+  // TODO
 }

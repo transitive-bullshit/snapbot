@@ -59,9 +59,9 @@ Todo:
   * ChatBotState
 
 var client = new SnapchatClient()
-var state = new ChatBotState()
+var mongoose = ...
 
-var bot = new TestBot(client, state)
+var bot = new TestBot(client, mongoose)
 
 ### Links
 

@@ -1,11 +1,11 @@
-var mongoose = require('mongoose')
+module.exports = function (mongoose) {
+  var UserSchema = new mongoose.Schema({
+    id: { type: String, required: true, index: true },
 
-var UserSchema = new mongoose.Schema({
-  id: { type: String, required: true, index: true },
+    username: { type: String, required: true, index: true },
 
-  username: { type: String, required: true, index: true },
+    displayName: { type: String }
+  })
 
-  displayName: { type: String }
-})
-
-module.exports = mongoose.model('User', UserSchema)
+  return mongoose.model('User', UserSchema)
+}
