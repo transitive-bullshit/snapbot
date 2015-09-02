@@ -35,7 +35,6 @@ Object.defineProperty(TelegramClient.prototype, 'username', {
 })
 
 Object.defineProperty(TelegramClient.prototype, 'user', {
-  // cached
   get: function () { return this._user }
 })
 
@@ -53,6 +52,16 @@ TelegramClient.prototype.signIn = function (opts, cb) {
   if (!opts.token) {
     throw new Error('telegram bot token required')
   }
+
+  utils.validateArgumentsCB(arguments, [
+    {
+      name: 'opts',
+      type: Object,
+      fields: {
+        token: String
+      }
+    }
+  ])
 
   self.client = new Telegram(opts)
   self.getMe(null, cb)
@@ -91,6 +100,24 @@ TelegramClient.prototype.getMe = function (opts, cb) {
       return cb(err, user)
     })
   })
+}
+
+TelegramClient.prototype.getUser = function (opts, cb) {
+  var self = this
+
+  if (!(opts.username || opts.id)) {
+    throw new Error('TelegramClient.getUser must provide either username or id')
+  }
+
+  var params = { }
+
+  if (opts.username) params.username = opts.username
+  if (opts.id) params.id = opts.id
+
+  // telegram bots can only interact with users they've encountered so far, so
+  // if the desired user isn't in the database, we don't have any way of
+  // querying the API for a user which may exist elsewhere.
+  self.User.findOne(params, cb)
 }
 
 TelegramClient.prototype.sendMessage = function (opts, cb) {
@@ -168,8 +195,4 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
       })
     })
   })
-}
-
-TelegramClient.prototype.sendPhoto = function (opts, cb) {
-  throw new Error('TODO')
 }
