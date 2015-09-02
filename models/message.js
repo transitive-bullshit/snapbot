@@ -1,5 +1,7 @@
+var findOrCreate = require("mongoose-findorcreate")
+
 module.exports = function (mongoose) {
-  var MessageSchema = new mongoose.Schema({
+  var messageSchema = new mongoose.Schema({
     id: { type: String, required: true, index: true },
 
     sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -30,5 +32,7 @@ module.exports = function (mongoose) {
     created: { type: Date, index: true }
   })
 
-  return mongoose.model('Message', MessageSchema)
+  messageSchema.plugin(findOrCreate)
+
+  return mongoose.model('Message', messageSchema)
 }

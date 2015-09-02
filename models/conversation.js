@@ -1,5 +1,7 @@
+var findOrCreate = require("mongoose-findorcreate")
+
 module.exports = function (mongoose) {
-  var ConversationSchema = new mongoose.Schema({
+  var conversationSchema = new mongoose.Schema({
     id: { type: String, required: true, index: true },
 
     messages: [ { type: mongoose.Schema.Types.ObjectId, ref: 'Message' } ],
@@ -11,5 +13,7 @@ module.exports = function (mongoose) {
     state: { type: String }
   })
 
-  return mongoose.model('Conversation', ConversationSchema)
+  conversationSchema.plugin(findOrCreate)
+
+  return mongoose.model('Conversation', conversationSchema)
 }

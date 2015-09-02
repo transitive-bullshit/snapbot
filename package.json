@@ -13,7 +13,10 @@
   "dependencies": {
     "async": "^1.4.2",
     "debug": "^2.1.0",
-    "inherits": "^2.0.1"
+    "inherits": "^2.0.1",
+    "mongoose": "^4.1.5",
+    "mongoose-findorcreate": "^0.1.2",
+    "node-telegram-bot": "^0.1.1"
   },
   "devDependencies": {
     "browserify": "^10.0.0",

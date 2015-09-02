@@ -1,5 +1,7 @@
+var findOrCreate = require("mongoose-findorcreate")
+
 module.exports = function (mongoose) {
-  var UserSchema = new mongoose.Schema({
+  var userSchema = new mongoose.Schema({
     id: { type: String, required: true, index: true },
 
     username: { type: String, required: true, index: true },
@@ -7,5 +9,7 @@ module.exports = function (mongoose) {
     displayName: { type: String }
   })
 
-  return mongoose.model('User', UserSchema)
+  userSchema.plugin(findOrCreate)
+
+  return mongoose.model('User', userSchema)
 }

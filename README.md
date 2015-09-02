@@ -29,7 +29,7 @@ ChatClient
   * events:
     * TODO
 
-ChatBot(client, state, opts)
+ChatBot(client, opts)
   * start
   * stop
 
@@ -59,9 +59,8 @@ Todo:
   * ChatBotState
 
 var client = new SnapchatClient()
-var mongoose = ...
 
-var bot = new TestBot(client, mongoose)
+var bot = new TestBot(client)
 
 ### Links
 

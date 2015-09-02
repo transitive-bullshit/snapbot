@@ -8,9 +8,9 @@ var debug = require('debug')('snapbot:test-bot')
  * @class
  * @param {Object} opts
  */
-function TestBot (client, state, opts) {
+function TestBot (client, opts) {
   var self = this
-  if (!(self instanceof TestBot)) return new TestBot(client, state, opts)
+  if (!(self instanceof TestBot)) return new TestBot(client, opts)
   if (!opts) opts = {}
 }
 

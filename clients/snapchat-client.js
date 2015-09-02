@@ -11,7 +11,7 @@ inherits(SnapchatClient, ChatClient)
  * SnapchatClient
  *
  * @class
- * @param {Object} opts (currently unused)
+ * @param {Object} opts
  */
 function SnapchatClient (opts) {
   var self = this
@@ -25,37 +25,43 @@ Object.defineProperty(ChatClient.prototype, 'platform', {
   get: function () { return 'snapchat' }
 })
 
+Object.defineProperty(ChatClient.prototype, 'isSignedIn', {
+  get: function () { return this.client.isSignedIn }
+})
+
 Object.defineProperty(ChatClient.prototype, 'username', {
   get: function () { return this.client.username }
 })
 
 Object.defineProperty(ChatClient.prototype, 'user', {
-  get: function () {
-    var self = this
-    var session = self.client.session
-
-    if (session) {
-      return new self.User({
-        id: session.userIdentifier,
-        username: session.username
-      })
-    }
-
-    return null
-  }
-})
-
-Object.defineProperty(ChatClient.prototype, 'friends', {
-  get: function () { return this._friends }
-})
-
-Object.defineProperty(ChatClient.prototype, 'conversations', {
-  get: function () { return this._conversations }
+  // cached
+  get: function () { return this._user }
 })
 
 SnapchatClient.prototype.signIn = function (opts, cb) {
   var self = this
-  self.client.signIn(cb)
+
+  self.client.signIn(function (err) {
+    if (err) {
+      return cb(err)
+    } else {
+      self._update(cb)
+    }
+  })
+}
+
+SnapchatClient.prototype._update = function (cb) {
+  var self = this
+  if (!self.isSignedIn) {
+    return cb('auth error; signIn required')
+  }
+
+  var session = self.client.session
+
+  self._user = self.User.findOrCreate({
+    id: session.userIdentifier,
+    username: session.username
+  }, cb)
 }
 
 SnapchatClient.prototype.getUpdates = function (opts, cb) {
@@ -88,9 +94,5 @@ SnapchatClient.prototype.sendMessage = function (opts, cb) {
 }
 
 SnapchatClient.prototype.sendPhoto = function (opts, cb) {
-  throw new Error('TODO')
-}
-
-SnapchatClient.prototype.sendVideo = function (opts, cb) {
   throw new Error('TODO')
 }
