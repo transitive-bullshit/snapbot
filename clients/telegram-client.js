@@ -318,9 +318,9 @@ TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
     function (cb) {
       self.Message.findOne({
         id: message['message_id']
-      }, function (err, result) {
+      }, function (err, doc) {
         if (err) return cb(err)
-        if (result) return cb(null, result)
+        if (doc) return cb(null, doc)
 
         var replyToMessage = message['reply_to_message']
         replyToMessage = replyToMessage && replyToMessage.id

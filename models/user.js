@@ -5,7 +5,7 @@ module.exports = function (connection) {
   var userSchema = new mongoose.Schema({
     id: { type: String, required: true, index: true },
 
-    username: { type: String, required: true, index: true },
+    username: { type: String, index: true },
 
     displayName: { type: String }
   })
