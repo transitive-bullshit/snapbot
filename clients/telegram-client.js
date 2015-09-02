@@ -6,6 +6,7 @@ var url = require('url')
 var path = require('path')
 var mime = require('mime')
 var request = require('request')
+var reemit = require('re-emitter')
 var Telegram = require('node-telegram-bot')
 var ChatClient = require('../lib/chat-client')
 var utils = require('../lib/utils')
@@ -67,17 +68,27 @@ TelegramClient.prototype.signIn = function (opts, cb) {
   ])
 
   self.client = new Telegram(opts)
-  self.getMe(null, cb)
+  self.getMe(null, function (err, user) {
+    if (err) return cb(err)
+
+    self._startListeningForUpdates()
+    return cb(null, user)
+  })
 }
 
-TelegramClient.prototype._listenForUpdates = function () {
+TelegramClient.prototype._startListeningForUpdates = function () {
   var self = this
 
   if (!self.isSignedIn) {
-    return cb('auth error; requires signIn')
+    throw new Error('auth error; requires signIn')
   }
 
-  self.client.on('
+  reemit(self.client, self, [ 'error' ])
+
+  self.client.on('message', function (message) {
+    // TODO
+    throw new Error('TODO')
+  })
 }
 
 TelegramClient.prototype.getUpdatesPoll = function (opts, cb) {
