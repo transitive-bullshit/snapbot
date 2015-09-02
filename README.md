@@ -4,44 +4,6 @@
 
 Snapbot provides common infrastructure and abstractions for creating chatbots that work across multiple chat platforms.
 
-ChatClient
-  * properties:
-    * platform
-    * username
-    * user
-    * friends
-    * conversations
-
-  * methods:
-    * signIn
-    * getUpdates
-    * getUpdatesPoll
-    * getUpdatesWebhook
-    * getFriends
-    * getConversations
-    * getMe
-    * sendMessage
-    * sendPhoto
-    * sendVideo
-    * save
-    * restore
-
-  * events:
-    * TODO
-
-ChatBot(client, opts)
-  * start
-  * stop
-
-ChatBotServer
-  * listen(port) // webhooks
-
-Models:
-  * User
-  * Conversation
-  * Message
-  * Blob/Media
-
 Clients:
   * SnapchatClient
   * KikChatClient
@@ -53,13 +15,16 @@ Bots:
   * Giphy
   * Eliza
   * Wolfram
+  * Test
 
-Todo:
+Future:
   * ChatBotManager
+    * manages multiple chatbots
   * ChatBotState
 
-var client = new SnapchatClient()
+### Usage
 
+var client = new SnapchatClient()
 var bot = new TestBot(client)
 
 ### Links
