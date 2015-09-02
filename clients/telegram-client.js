@@ -84,9 +84,12 @@ TelegramClient.prototype._startListeningForUpdates = function () {
   }
 
   reemit(self.client, self, [ 'error' ])
+  self.client.on('error', function (err) {
+    debug('TelegramClient:error %s', err)
+  })
 
   self.client.on('message', function (message) {
-    console.log('message', message)
+    debug('TelegramClient:message %j', message)
 
     self._findOrCreateMessage(message, function (err, message) {
       self.emit('message', message)
