@@ -144,10 +144,12 @@ TelegramClient.prototype.sendPhoto = function (opts, cb) {
   utils.validateArgumentsCB(arguments, [
     {
       name: 'opts',
-      type: Object,
       fields: {
         recipient: self.User,
-        replyToMessage: self.Message,
+        replyToMessage: {
+          type: self.Message,
+          required: false
+        },
         caption: {
           type: String,
           required: false
@@ -171,7 +173,7 @@ TelegramClient.prototype.sendPhoto = function (opts, cb) {
     'file_id': opts.mediaID
   }
 
-  function sendMessage () {
+  function _sendMessage () {
     self._sendMessage(self.client.sendPhoto, params, opts, cb)
   }
 
@@ -181,15 +183,17 @@ TelegramClient.prototype.sendPhoto = function (opts, cb) {
 
     params.files = {
       filename: filename,
-      contentType: mime(filename),
+      contentType: mime.lookup(filename),
       stream: request(opts.mediaURL, { encoding: null })
     }
 
     // send message with media stream attached as multipart/form-data
-    sendMessage()
-  } else {
+    _sendMessage()
+  } else if (opts.mediaID) {
     // send message with pre-existing media
-    sendMessage()
+    _sendMessage()
+  } else {
+    throw new Error('TelegramClient.sendMessage requires either opts.mediaURL or opts.mediaID')
   }
 }
 
