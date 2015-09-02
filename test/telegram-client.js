@@ -71,11 +71,30 @@ test('TelegramClient.getUser(_id)', function (t) {
 })*/
 
 test('TelegramClient.startUpdatesPoll', function (t) {
+  /*
+  var numMessages = 3
+  t.plan(numMessages + 2)
+
   client.on('message', function (message) {
+    if (--numMessages > 0) {
+      t.ok(message)
+    } else {
+      client.stopUpdates(null, function (err) {
+        t.notOk(err)
+      })
+    }
   })
+  */
 
   client.startUpdatesPoll(null, function (err) {
     t.notOk(err)
+
+    setTimeout(function () {
+      client.stopUpdates(null, function (err) {
+        t.notOk(err)
+        t.end()
+      })
+    }, 50000)
   })
 })
 

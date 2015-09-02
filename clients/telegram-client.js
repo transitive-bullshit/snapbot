@@ -2,6 +2,7 @@ module.exports = TelegramClient
 
 var debug      = require('debug')('snapbot:telegram-client')
 var inherits   = require('inherits')
+var async      = require('async')
 var url        = require('url')
 var path       = require('path')
 var mime       = require('mime')
@@ -92,7 +93,12 @@ TelegramClient.prototype._startListeningForUpdates = function () {
     debug('TelegramClient:message %j', message)
 
     self._findOrCreateMessage(message, function (err, message) {
-      self.emit('message', message)
+      if (err) {
+        self.emit('error', err)
+      } else {
+        self._lastMessageReceived = message
+        self.emit('message', message)
+      }
     })
   })
 }
@@ -267,73 +273,85 @@ TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
 }
 
 TelegramClient.prototype._findOrCreateUser = function (user, cb) {
+  debug('TelegramClient._findOrCreateUser %j', user)
   var self = this
 
-  var params = {
-    id: user.id,
-    username: user.username
-  }
+  self.User.findOne({
+    id: user.id
+  }, function (err, doc) {
+    if (err) return cb(err)
+    if (doc) return cb(null, doc)
 
-  if (user.title) {
-    params.displayName = user.title
-  } else if (user['first_name']) {
-    params.displayName = user['first_name']
-
-    if (user['last_name']) {
-      params.displayName += ' ' + user['last_name']
+    var params = {
+      id: user.id,
+      username: user.username
     }
-  }
 
-  self.User.findOrCreate(params, cb)
+    if (user.title) {
+      params.displayName = user.title
+    } else if (user['first_name']) {
+      params.displayName = user['first_name']
+
+      if (user['last_name']) {
+        params.displayName += ' ' + user['last_name']
+      }
+    }
+
+    self.User.create(params, cb)
+  })
 }
 
 TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
   var self = this
 
-  // TODO: should message.from always exist as a user?
-  self._findOrCreateUser(message.from, function (err, sender) {
-  })
+  async.parallel([
+    function (cb) {
+      self._findOrCreateUser(message.from, cb)
+    },
 
-  self.Conversation.findOrCreate({
-    id: message.chat.id
-  }, function (err, conversation) {
+    function (cb) {
+      self.Conversation.findOrCreate({
+        id: message.chat.id
+      }, cb)
+    },
+
+    function (cb) {
+      self.Message.findOne({
+        id: message['message_id']
+      }, function (err, result) {
+        if (err) return cb(err)
+        if (result) return cb(null, result)
+
+        var replyToMessage = message['reply_to_message']
+        replyToMessage = replyToMessage && replyToMessage.id
+
+        var messageParams = {
+          id: message['message_id'],
+          conversation: message.chat.id,
+          sender: message.from.id,
+          replyToMessage: replyToMessage,
+          text: message.text,
+          created: new Date(message.date * 1000)
+        }
+
+        if (message.photo) {
+          messageParams.media = message.photo.map(function (photo) {
+            self.assert(photo['file_id'])
+
+            return {
+              id: photo['file_id'],
+              type: 'image',
+              width: photo.width,
+              height: photo.height
+            }
+          })
+        }
+
+        self.Message.create(messageParams, cb)
+      })
+    }
+  ], function (err, results) {
     if (err) return cb(err)
-
-    self.Message.findOne({
-      id: message['message_id']
-    }, function (err, message) {
-      if (err) return cb(err)
-
-      if (message) {
-        return cb(null, message)
-      }
-
-      var replyToMessage = message['reply_to_message']
-      replyToMessage = replyToMessage && replyToMessage.id
-
-      var messageParams = {
-        id: message['message_id'],
-        conversation: conversation.id,
-        sender: message.from.id,
-        replyToMessage: replyToMessage,
-        text: message.text,
-        created: new Date(message.date * 1000)
-      }
-
-      if (message.photo) {
-        messageParams.media = message.photo.map(function (photo) {
-          self.assert(photo['file_id'])
-
-          return {
-            id: photo['file_id'],
-            type: 'image',
-            width: photo.width,
-            height: photo.height
-          }
-        })
-      }
-
-      self.Message.create(messageParams, cb)
-    })
+    return cb(null, results[results.length - 1])
   })
 }
