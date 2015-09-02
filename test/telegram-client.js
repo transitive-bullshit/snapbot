@@ -5,27 +5,31 @@ require('dotenv').load()
 var test = require('tape')
 var TelegramClient = require('../clients/telegram-client')
 
-var TELEGRAM_USERNAME = process.env.TELEGRAM_USERNAME
 var TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
 
-var HAS_AUTH = TELEGRAM_TOKEN && TELEGRAM_USERNAME
-
-if (!HAS_AUTH || !) {
+if (!TELEGRAM_TOKEN) {
   throw new Error('missing required environment auth variables')
 }
 
-var MONGODB_HOST = process.env.MONGODB_HOST || 'localhost'
-mongoose.connect(process.env.MONGODB)
+var client = new TelegramClient({
+  dbHost: process.env.MONGODB_HOST,
+  dbName: 'test',
+  debug: true
+})
 
-var client = new TelegramClient()
+test('TelegramClient.signIn', function (t) {
+  t.equal(client.platform, 'telegram')
+  t.notOk(client.isSignedIn)
 
-test('Snapchat._getGoogleAuthToken', function (t) {
-  var client = new Snapchat()
-
-  client._getGoogleAuthToken(SNAPCHAT_GMAIL_EMAIL, SNAPCHAT_GMAIL_PASSWORD, function (err, result) {
+  client.signIn({
+    token: TELEGRAM_TOKEN
+  }, function (err) {
     t.notOk(err)
-    t.ok(result)
-    t.equal(typeof result, 'string')
+    t.ok(client.isSignedIn)
+    t.equal(client.username, 'SnapsTest0Bot')
+    t.ok(client.user)
+    t.ok(client.user._id)
+    t.equal(client.user.id, TELEGRAM_TOKEN.split(':')[0])
     t.end()
   })
 })

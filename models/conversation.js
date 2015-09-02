@@ -1,6 +1,7 @@
 var findOrCreate = require("mongoose-findorcreate")
+var mongoose = require('mongoose')
 
-module.exports = function (mongoose) {
+module.exports = function (conn) {
   var conversationSchema = new mongoose.Schema({
     id: { type: String, required: true, index: true },
 
@@ -17,5 +18,5 @@ module.exports = function (mongoose) {
 
   conversationSchema.plugin(findOrCreate)
 
-  return mongoose.model('Conversation', conversationSchema)
+  return conn.model('Conversation', conversationSchema)
 }

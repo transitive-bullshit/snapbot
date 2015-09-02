@@ -1,4 +1,6 @@
-module.exports = function (mongoose) {
+var mongoose = require('mongoose')
+
+module.exports = function (conn) {
   var messageSchema = new mongoose.Schema({
     // platform-dependent unique message identifier
     id: { type: String, required: true, index: true },
@@ -47,5 +49,5 @@ module.exports = function (mongoose) {
     created: { type: Date, index: true }
   })
 
-  return mongoose.model('Message', messageSchema)
+  return conn.model('Message', messageSchema)
 }

@@ -18,19 +18,13 @@
     "mongoose": "^4.1.5",
     "mongoose-findorcreate": "^0.1.2",
     "node-telegram-bot": "^0.1.1",
-    "re-emitter": "^1.1.1"
+    "re-emitter": "^1.1.1",
+    "request": "^2.61.0"
   },
   "devDependencies": {
-    "browserify": "^10.0.0",
     "dotenv": "^1.2.0",
-    "gulp": "^3.9.0",
-    "gulp-gh-pages": "^0.5.2",
-    "gulp-npm-run": "0.0.1",
-    "ink-docstrap": "git://github.com/fisch0920/docstrap",
-    "jsdoc": "^3.3.2",
     "standard": "^4.0.1",
-    "tape": "^4.0.0",
-    "uglify-js": "^2.4.15"
+    "tape": "^4.0.0"
   },
   "keywords": [
     "chatbot",
@@ -48,10 +42,6 @@
     "url": "git://github.com/SnapsApp/snapbot.git"
   },
   "scripts": {
-    "build": "browserify -s Snapchat -e ./ | uglifyjs -m > snapbot.min.js",
-    "build-debug": "browserify -s Snapchat -e ./ > snapbot.debug.js",
-    "docs": "node ./node_modules/jsdoc/jsdoc.js -c .jsdoc.json -R README.md",
-    "size": "npm run build && cat snapbot.min.js | gzip | wc -c",
     "test": "standard && tape test/*.js",
     "test-node": "tape test/*.js"
   }
