@@ -287,6 +287,7 @@ TelegramClient.prototype._findOrCreateUser = function (user, cb) {
 TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
   var self = this
 
+  // TODO: should message.from always exist as a user?
   self._findOrCreateUser(message.from, function (err, sender) {
   })
 
