@@ -70,17 +70,28 @@ TelegramClient.prototype.signIn = function (opts, cb) {
   self.getMe(null, cb)
 }
 
-TelegramClient.prototype.getUpdates = function (opts, cb) {
+TelegramClient.prototype._listenForUpdates = function () {
   var self = this
-  throw new Error('TODO')
+
+  if (!self.isSignedIn) {
+    return cb('auth error; requires signIn')
+  }
+
+  self.client.on('
 }
 
 TelegramClient.prototype.getUpdatesPoll = function (opts, cb) {
-  throw new Error('TODO')
+  var self = this
+
 }
 
 TelegramClient.prototype.getUpdatesWebhook = function (opts, cb) {
-  throw new Error('TODO')
+  throw new Error('TODO: support telegram webhooks', opts, cb)
+}
+
+TelegramClient.prototype.stopUpdates = function (opts, cb) {
+  var self = this
+
 }
 
 TelegramClient.prototype.getMe = function (opts, cb) {
