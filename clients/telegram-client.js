@@ -299,34 +299,41 @@ TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
   }, function (err, conversation) {
     if (err) return cb(err)
 
-    var messageParams = {
-      id: message['message_id'],
-      conversation: conversation.id,
-      sender: message.from.id,
-      replyToMessage: replyToMessage.id,
-      text: message.text,
-      created: new Date(message.date * 1000)
-    }
+    self.Message.findOne({
+      id: message['message_id']
+    }, function (err, message) {
+      if (err) return cb(err)
 
-    if (message.photo) {
-      messageParams.media = message.photo.map(function (photo) {
-        self.assert(photo['file_id'])
-
-        return {
-          id: photo['file_id'],
-          type: 'image',
-          width: photo.width,
-          height: photo.height
-        }
-      })
-    }
-
-    self.Message.create(messageParams, function (err, message) {
-      if (!err) {
-        self._lastMessageSent = message
+      if (message) {
+        return cb(null, message)
       }
 
-      return cb(err, message)
+      var replyToMessage = message['reply_to_message']
+      replyToMessage = replyToMessage && replyToMessage.id
+
+      var messageParams = {
+        id: message['message_id'],
+        conversation: conversation.id,
+        sender: message.from.id,
+        replyToMessage: replyToMessage,
+        text: message.text,
+        created: new Date(message.date * 1000)
+      }
+
+      if (message.photo) {
+        messageParams.media = message.photo.map(function (photo) {
+          self.assert(photo['file_id'])
+
+          return {
+            id: photo['file_id'],
+            type: 'image',
+            width: photo.width,
+            height: photo.height
+          }
+        })
+      }
+
+      self.Message.create(messageParams, cb)
     })
   })
 }
