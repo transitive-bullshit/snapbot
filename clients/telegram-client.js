@@ -253,49 +253,12 @@ TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
       self.assert.equal(result['reply_to_message'].id, replyToMessage.id)
     }
 
-    self.Conversation.findOrCreate({
-      id: result.chat.id,
-      sender: self._user.id,
-      recipients: [ opts.recipient.id ],
-    }, function (err, conversation) {
-      if (err) return cb(err)
-
-      if (replyToMessage.id) {
-        self.assert.equal(replyToMessage.conversation, conversation._id)
+    self._findOrCreateMessage(result, function (err, message) {
+      if (!err) {
+        self._lastMessageSent = message
       }
 
-      var messageParams = {
-        id: result['message_id'],
-        conversation: conversation.id,
-        sender: result.from.id,
-        replyToMessage: replyToMessage.id,
-        text: result.text,
-        created: new Date(result.date * 1000)
-      }
-
-      if (method === self.client.sendPhoto) {
-        self.assert(result.photo.length)
-
-        messageParams.media = result.photo.map(function (photo) {
-          self.assert(photo['file_id'])
-
-          return {
-            id: photo['file_id'],
-            url: opts.mediaURL,
-            type: 'image',
-            width: photo.width,
-            height: photo.height
-          }
-        })
-      }
-
-      self.Message.create(messageParams, function (err, message) {
-        if (!err) {
-          self._lastMessageSent = message
-        }
-
-        return cb(err, message)
-      })
+      return cb(err, message)
     })
   })
 }
@@ -328,9 +291,7 @@ TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
   })
 
   self.Conversation.findOrCreate({
-    id: message.chat.id,
-    sender: self._user.id,
-    recipients: [ opts.recipient.id ]
+    id: message.chat.id
   }, function (err, conversation) {
     if (err) return cb(err)
 
