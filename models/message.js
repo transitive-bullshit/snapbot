@@ -1,12 +1,10 @@
-var findOrCreate = require("mongoose-findorcreate")
-
 module.exports = function (mongoose) {
   var messageSchema = new mongoose.Schema({
     // platform-dependent unique message identifier
     id: { type: String, required: true, index: true },
 
     // conversation this message belongs to
-    conversation: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation' },
+    conversation: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', index: true },
     conversationID: { type: String, required: true, index: true },
 
     // sender of this message
@@ -27,6 +25,12 @@ module.exports = function (mongoose) {
       url: { type: String },
       mime: { type: String },
 
+      // image
+      // video
+      // audio
+      // document
+      type: { type: String },
+
       width: { type: Number },
       height: { type: Number },
 
@@ -34,16 +38,8 @@ module.exports = function (mongoose) {
       thumbnail: { type: String }
     },
 
-    // text
-    // image
-    // video
-    // audio
-    type: { type: String },
-
     created: { type: Date, index: true }
   })
-
-  messageSchema.plugin(findOrCreate)
 
   return mongoose.model('Message', messageSchema)
 }

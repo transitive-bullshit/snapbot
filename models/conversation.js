@@ -4,11 +4,13 @@ module.exports = function (mongoose) {
   var conversationSchema = new mongoose.Schema({
     id: { type: String, required: true, index: true },
 
-    messages: [ { type: mongoose.Schema.Types.ObjectId, ref: 'Message' } ],
-    messageIDs: [ { type: String } ],
+    // sender of this message
+    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    senderID: { type: String },
 
-    users: [ { type: mongoose.Schema.Types.ObjectId, ref: 'User' } ],
-    userIDs: [ { type: String } ],
+    // recipient(s) of this message
+    recipients: [ { type: mongoose.Schema.Types.ObjectId, ref: 'User' } ],
+    recipientIDs: [ { type: String } ],
 
     state: { type: String }
   })

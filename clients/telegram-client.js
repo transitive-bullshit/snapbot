@@ -1,7 +1,6 @@
 module.exports = TelegramClient
 
 var debug = require('debug')('snapbot:telegram-client')
-var assert = require('assert')
 var inherits = require('inherits')
 var Telegram = require('node-telegram-bot')
 var ChatClient = require('../lib/chat-client')
@@ -100,21 +99,46 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
     return cb('auth error; requires signIn')
   }
 
-  opts.conversation
-  opts.replyToMessage
-  opts.recipient
+  /*utils.validateArguments(arguments, {
+    opts: {
+      recipient: self.User,
+      text: String,
+      replyToMessage: self.Message
+    }
+  })*/
+  //opts.conversation
+  //opts.replyToMessage
+  //opts.recipient
+
+  var replyToMessage = opts.replyToMessage || { }
 
   self.client.sendMessage({
     'chat_id': opts.recipient.id,
     'text': opts.text,
-    'reply_to_message_id': opts.replyToMessage.id
+    'reply_to_message_id': replyToMessage.id
   }, function (err, result) {
     if (err) return cb(err)
 
-    if (self.debug) {
-      assert.equal(result.from.id, self._user.id)
-      //assert.equal(result.chat.id, opts.conversation.id)
+    self.assert.equal(result.from.id, self._user.id)
+    self.assert.equal(result.chat.id, opts.recipient.id)
+    self.assert.equal(result.text, opts.text)
+
+    if (replyToMessage.id) {
+      self.assert.equal(result['reply_to_message'].id, replyToMessage.id)
     }
+
+    self.Conversation.findOrCreate({
+      id: result.chat.id,
+
+      sender: self._user._id,
+      senderID: self._user.id,
+
+      recipients: [ opts.recipient._id ],
+      recipientIDs: [ opts.recipient.id ]
+    }, function (err, conversation) {
+      if (err) return cb(err)
+      assert.equal(replyToMessage.conversation)
+    })
 
     self.Message.create({
       id: result['message_id'],
@@ -125,7 +149,12 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
       sender: self._user._id,
       senderID: result.from.id,
 
-      recipients:
+      replyToMessage: replyToMessage._id,
+      replyToMessageID: replyToMessage.id,
+
+      text: opts.text,
+
+      created: new Date(result.date)
     }, function (err, message) {
       if (!err) {
         self._lastMessageSent = message
