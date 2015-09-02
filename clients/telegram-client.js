@@ -2,6 +2,10 @@ module.exports = TelegramClient
 
 var debug = require('debug')('snapbot:telegram-client')
 var inherits = require('inherits')
+var url = require('url')
+var path = require('path')
+var mime = require('mime')
+var request = require('request')
 var Telegram = require('node-telegram-bot')
 var ChatClient = require('../lib/chat-client')
 var utils = require('../lib/utils')
@@ -56,7 +60,6 @@ TelegramClient.prototype.signIn = function (opts, cb) {
   utils.validateArgumentsCB(arguments, [
     {
       name: 'opts',
-      type: Object,
       fields: {
         token: String
       }
@@ -105,27 +108,38 @@ TelegramClient.prototype.getMe = function (opts, cb) {
 TelegramClient.prototype.getUser = function (opts, cb) {
   var self = this
 
-  if (!(opts.username || opts.id)) {
-    throw new Error('TelegramClient.getUser must provide either username or id')
-  }
-
-  var params = { }
-
-  if (opts.username) params.username = opts.username
-  if (opts.id) params.id = opts.id
-
   // telegram bots can only interact with users they've encountered so far, so
   // if the desired user isn't in the database, we don't have any way of
   // querying the API for a user which may exist elsewhere.
-  self.User.findOne(params, cb)
+  ChatClient.prototype.getUser.call(self, opts, cb)
 }
 
 TelegramClient.prototype.sendMessage = function (opts, cb) {
   var self = this
 
-  if (!self.isSignedIn) {
-    return cb('auth error; requires signIn')
-  }
+  utils.validateArgumentsCB(arguments, [
+    {
+      name: 'opts',
+      fields: {
+        recipient: self.User,
+        replyToMessage: {
+          type: self.Message,
+          required: false
+        },
+        text: String
+      }
+    }
+  ])
+
+  self._sendMessage(self.client.sendPhoto, {
+    'chat_id': opts.recipient.id,
+    'reply_to_message_id': opts.replyToMessage && opts.replyToMessage.id,
+    'text': opts.text
+  }, opts, cb)
+}
+
+TelegramClient.prototype.sendPhoto = function (opts, cb) {
+  var self = this
 
   utils.validateArgumentsCB(arguments, [
     {
@@ -133,19 +147,62 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
       type: Object,
       fields: {
         recipient: self.User,
-        text: String,
-        replyToMessage: self.Message
+        replyToMessage: self.Message,
+        caption: {
+          type: String,
+          required: false
+        },
+        mediaURL: {
+          type: String,
+          required: false
+        },
+        mediaID: {
+          type: String,
+          required: false
+        }
       }
     }
   ])
 
+  var params = {
+    'chat_id': opts.recipient.id,
+    'reply_to_message_id': opts.replyToMessage && opts.replyToMessage.id,
+    'caption': opts.caption,
+    'file_id': opts.mediaID
+  }
+
+  function sendMessage () {
+    self._sendMessage(self.client.sendPhoto, params, opts, cb)
+  }
+
+  if (opts.mediaURL && !opts.mediaID) {
+    var parsed = url.parse(opts.mediaURL)
+    var filename = path.basename(parsed.pathname)
+
+    params.files = {
+      filename: filename,
+      contentType: mime(filename),
+      stream: request(opts.mediaURL, { encoding: null })
+    }
+
+    // send message with media stream attached as multipart/form-data
+    sendMessage()
+  } else {
+    // send message with pre-existing media
+    sendMessage()
+  }
+}
+
+TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
+  var self = this
+
+  if (!self.isSignedIn) {
+    return cb('auth error; requires signIn')
+  }
+
   var replyToMessage = opts.replyToMessage || { }
 
-  self.client.sendMessage({
-    'chat_id': opts.recipient.id,
-    'text': opts.text,
-    'reply_to_message_id': replyToMessage.id
-  }, function (err, result) {
+  method.call(self.client, params, function (err, result) {
     if (err) return cb(err)
 
     self.assert.equal(result.from.id, self._user.id)
@@ -171,7 +228,7 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
         self.assert.equal(replyToMessage.conversation, conversation._id)
       }
 
-      self.Message.create({
+      var messageParams = {
         id: result['message_id'],
 
         conversation: conversation._id,
@@ -183,10 +240,28 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
         replyToMessage: replyToMessage._id,
         replyToMessageID: replyToMessage.id,
 
-        text: opts.text,
+        text: result.text,
 
         created: new Date(result.date)
-      }, function (err, message) {
+      }
+
+      if (method === self.client.sendPhoto) {
+        self.assert(result.photo.length)
+
+        messageParams.media = result.photo.map(function (photo) {
+          self.assert(photo['file_id'])
+
+          return {
+            id: photo['file_id'],
+            url: opts.mediaURL,
+            type: 'image',
+            width: photo.width,
+            height: photo.height
+          }
+        })
+      }
+
+      self.Message.create(messageParams, function (err, message) {
         if (!err) {
           self._lastMessageSent = message
         }

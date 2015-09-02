@@ -21,22 +21,28 @@ module.exports = function (mongoose) {
 
     text: { type: String },
 
-    media: {
-      url: { type: String },
-      mime: { type: String },
+    caption: { type: String },
 
-      // image
-      // video
-      // audio
-      // document
-      type: { type: String },
+    media: [
+      {
+        id: { type: String },
 
-      width: { type: Number },
-      height: { type: Number },
+        url: { type: String },
+        mime: { type: String },
 
-      duration: { type: Number },
-      thumbnail: { type: String }
-    },
+        // image
+        // video
+        // audio
+        // document
+        type: { type: String },
+
+        width: { type: Number },
+        height: { type: Number },
+
+        duration: { type: Number },
+        thumbnail: { type: String },
+      }
+    ],
 
     created: { type: Date, index: true }
   })
