@@ -1,15 +1,15 @@
 module.exports = TelegramClient
 
-var debug = require('debug')('snapbot:telegram-client')
-var inherits = require('inherits')
-var url = require('url')
-var path = require('path')
-var mime = require('mime')
-var request = require('request')
-var reemit = require('re-emitter')
-var Telegram = require('node-telegram-bot')
+var debug      = require('debug')('snapbot:telegram-client')
+var inherits   = require('inherits')
+var url        = require('url')
+var path       = require('path')
+var mime       = require('mime')
+var request    = require('request')
+var reemit     = require('re-emitter')
+var Telegram   = require('node-telegram-bot')
 var ChatClient = require('../lib/chat-client')
-var utils = require('../lib/utils')
+var utils      = require('../lib/utils')
 
 inherits(TelegramClient, ChatClient)
 

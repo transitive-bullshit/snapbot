@@ -1,8 +1,8 @@
 module.exports = SnapchatClient
 
-var debug = require('debug')('snapbot:snapchat-client')
-var inherits = require('inherits')
-var Snapchat = require('snapchat')
+var debug      = require('debug')('snapbot:snapchat-client')
+var inherits   = require('inherits')
+var Snapchat   = require('snapchat')
 var ChatClient = require('../lib/chat-client')
 
 inherits(SnapchatClient, ChatClient)
