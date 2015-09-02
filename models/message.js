@@ -6,20 +6,16 @@ module.exports = function (connection) {
     id: { type: String, required: true, index: true },
 
     // conversation this message belongs to
-    conversation: { type: mongoose.Schema.Types.ObjectId, ref: 'Conversation', index: true },
-    conversationID: { type: String, required: true, index: true },
+    conversation: { type: String, required: true, index: true },
 
     // sender of this message
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    senderID: { type: String },
+    sender: { type: String },
 
     // recipient(s) of this message
-    recipients: [ { type: mongoose.Schema.Types.ObjectId, ref: 'User' } ],
-    recipientIDs: [ { type: String } ],
+    recipients: [ { type: String } ],
 
     // reference to the original message this message is in response to (optional)
-    replyToMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
-    replyToMessageID: { type: String },
+    replyToMessage: { type: String },
 
     text: { type: String },
 

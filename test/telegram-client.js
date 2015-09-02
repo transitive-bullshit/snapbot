@@ -6,8 +6,9 @@ var test = require('tape')
 var TelegramClient = require('../clients/telegram-client')
 
 var TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN
+var TELEGRAM_TOKEN1 = process.env.TELEGRAM_TOKEN1
 
-if (!TELEGRAM_TOKEN) {
+if (!(TELEGRAM_TOKEN && TELEGRAM_TOKEN1)) {
   throw new Error('missing required environment auth variables')
 }
 
@@ -39,7 +40,7 @@ test('TelegramClient.signIn', function (t) {
   })
 })
 
-test('TelegramClient.getUser(username)', function (t) {
+/*test('TelegramClient.getUser(username)', function (t) {
   client.getUser({
     username: client.username
   }, function (err, user) {
@@ -66,6 +67,15 @@ test('TelegramClient.getUser(_id)', function (t) {
     t.notOk(err)
     t.equal(user._id.toString(), client.user._id.toString())
     t.end()
+  })
+})*/
+
+test('TelegramClient.startUpdatesPoll', function (t) {
+  client.on('message', function (message) {
+  })
+
+  client.startUpdatesPoll(null, function (err) {
+    t.notOk(err)
   })
 })
 

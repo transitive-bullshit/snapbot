@@ -6,12 +6,10 @@ module.exports = function (connection) {
     id: { type: String, required: true, index: true },
 
     // sender of this message
-    sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    senderID: { type: String },
+    sender: { type: String },
 
     // recipient(s) of this message
-    recipients: [ { type: mongoose.Schema.Types.ObjectId, ref: 'User' } ],
-    recipientIDs: [ { type: String } ],
+    recipients: [ { type: String } ],
 
     state: { type: String }
   })

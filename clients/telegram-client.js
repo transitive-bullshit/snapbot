@@ -86,23 +86,37 @@ TelegramClient.prototype._startListeningForUpdates = function () {
   reemit(self.client, self, [ 'error' ])
 
   self.client.on('message', function (message) {
-    // TODO
-    throw new Error('TODO')
+    console.log('message', message)
+
+    self._findOrCreateMessage(message, function (err, message) {
+      self.emit('message', message)
+    })
   })
 }
 
-TelegramClient.prototype.getUpdatesPoll = function (opts, cb) {
+TelegramClient.prototype.startUpdatesPoll = function (opts, cb) {
   var self = this
 
+  self.client.start()
+  process.nextTick(cb)
 }
 
-TelegramClient.prototype.getUpdatesWebhook = function (opts, cb) {
+TelegramClient.prototype.startUpdatesWebhook = function (opts, cb) {
+  var self = this
+
+  if (self.client.polling) {
+    throw new Error('TelegramClient.startUpdatesWebhook incompatible with startUpdatesPoll')
+  }
+
   throw new Error('TODO: support telegram webhooks', opts, cb)
+  process.nextTick(cb)
 }
 
 TelegramClient.prototype.stopUpdates = function (opts, cb) {
   var self = this
 
+  self.client.stop()
+  process.nextTick(cb)
 }
 
 TelegramClient.prototype.getMe = function (opts, cb) {
@@ -241,12 +255,8 @@ TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
 
     self.Conversation.findOrCreate({
       id: result.chat.id,
-
-      sender: self._user._id,
-      senderID: self._user.id,
-
-      recipients: [ opts.recipient._id ],
-      recipientIDs: [ opts.recipient.id ]
+      sender: self._user.id,
+      recipients: [ opts.recipient.id ],
     }, function (err, conversation) {
       if (err) return cb(err)
 
@@ -256,19 +266,11 @@ TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
 
       var messageParams = {
         id: result['message_id'],
-
-        conversation: conversation._id,
-        conversationID: conversation.id,
-
-        sender: self._user._id,
-        senderID: result.from.id,
-
-        replyToMessage: replyToMessage._id,
-        replyToMessageID: replyToMessage.id,
-
+        conversation: conversation.id,
+        sender: result.from.id,
+        replyToMessage: replyToMessage.id,
         text: result.text,
-
-        created: new Date(result.date)
+        created: new Date(result.date * 1000)
       }
 
       if (method === self.client.sendPhoto) {
@@ -294,6 +296,72 @@ TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
 
         return cb(err, message)
       })
+    })
+  })
+}
+
+TelegramClient.prototype._findOrCreateUser = function (user, cb) {
+  var self = this
+
+  var params = {
+    id: user.id,
+    username: user.username
+  }
+
+  if (user.title) {
+    params.displayName = user.title
+  } else if (user['first_name']) {
+    params.displayName = user['first_name']
+
+    if (user['last_name']) {
+      params.displayName += ' ' + user['last_name']
+    }
+  }
+
+  self.User.findOrCreate(params, cb)
+}
+
+TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
+  var self = this
+
+  self._findOrCreateUser(message.from, function (err, sender) {
+  })
+
+  self.Conversation.findOrCreate({
+    id: message.chat.id,
+    sender: self._user.id,
+    recipients: [ opts.recipient.id ]
+  }, function (err, conversation) {
+    if (err) return cb(err)
+
+    var messageParams = {
+      id: message['message_id'],
+      conversation: conversation.id,
+      sender: message.from.id,
+      replyToMessage: replyToMessage.id,
+      text: message.text,
+      created: new Date(message.date * 1000)
+    }
+
+    if (message.photo) {
+      messageParams.media = message.photo.map(function (photo) {
+        self.assert(photo['file_id'])
+
+        return {
+          id: photo['file_id'],
+          type: 'image',
+          width: photo.width,
+          height: photo.height
+        }
+      })
+    }
+
+    self.Message.create(messageParams, function (err, message) {
+      if (!err) {
+        self._lastMessageSent = message
+      }
+
+      return cb(err, message)
     })
   })
 }
