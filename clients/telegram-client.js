@@ -1,6 +1,7 @@
 module.exports = TelegramClient
 
 var debug = require('debug')('snapbot:telegram-client')
+var assert = require('assert')
 var inherits = require('inherits')
 var Telegram = require('node-telegram-bot')
 var ChatClient = require('../lib/chat-client')
@@ -21,21 +22,29 @@ function TelegramClient (opts) {
   self.client = null
 }
 
-Object.defineProperty(ChatClient.prototype, 'platform', {
+Object.defineProperty(TelegramClient.prototype, 'platform', {
   get: function () { return 'telegram' }
 })
 
-Object.defineProperty(ChatClient.prototype, 'isSignedIn', {
+Object.defineProperty(TelegramClient.prototype, 'isSignedIn', {
   get: function () { return this.client && this._user }
 })
 
-Object.defineProperty(ChatClient.prototype, 'username', {
+Object.defineProperty(TelegramClient.prototype, 'username', {
   get: function () { return this._user && this._user.username }
 })
 
-Object.defineProperty(ChatClient.prototype, 'user', {
+Object.defineProperty(TelegramClient.prototype, 'user', {
   // cached
   get: function () { return this._user }
+})
+
+Object.defineProperty(TelegramClient.prototype, 'lastMessageReceived', {
+  get: function () { return this._lastMessageReceived }
+})
+
+Object.defineProperty(TelegramClient.prototype, 'lastMessageSent', {
+  get: function () { return this._lastMessageSent }
 })
 
 TelegramClient.prototype.signIn = function (opts, cb) {
@@ -62,14 +71,6 @@ TelegramClient.prototype.getUpdatesWebhook = function (opts, cb) {
   throw new Error('TODO')
 }
 
-TelegramClient.prototype.getFriends = function (opts, cb) {
-  throw new Error('TODO')
-}
-
-TelegramClient.prototype.getConversations = function (opts, cb) {
-  throw new Error('TODO')
-}
-
 TelegramClient.prototype.getMe = function (opts, cb) {
   var self = this
 
@@ -93,7 +94,46 @@ TelegramClient.prototype.getMe = function (opts, cb) {
 }
 
 TelegramClient.prototype.sendMessage = function (opts, cb) {
-  throw new Error('TODO')
+  var self = this
+
+  if (!self.isSignedIn) {
+    return cb('auth error; requires signIn')
+  }
+
+  opts.conversation
+  opts.replyToMessage
+  opts.recipient
+
+  self.client.sendMessage({
+    'chat_id': opts.recipient.id,
+    'text': opts.text,
+    'reply_to_message_id': opts.replyToMessage.id
+  }, function (err, result) {
+    if (err) return cb(err)
+
+    if (self.debug) {
+      assert.equal(result.from.id, self._user.id)
+      //assert.equal(result.chat.id, opts.conversation.id)
+    }
+
+    self.Message.create({
+      id: result['message_id'],
+
+      conversation: opts.conversation._id,
+      conversationID: opts.conversation.id,
+
+      sender: self._user._id,
+      senderID: result.from.id,
+
+      recipients:
+    }, function (err, message) {
+      if (!err) {
+        self._lastMessageSent = message
+      }
+
+      return cb(err, message)
+    })
+  })
 }
 
 TelegramClient.prototype.sendPhoto = function (opts, cb) {
