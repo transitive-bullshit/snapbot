@@ -136,14 +136,9 @@ TelegramClient.prototype.getMe = function (opts, cb) {
   }
 
   self.client.getMe(function (err, result) {
-    if (err) {
-      return cb(err)
-    }
+    if (err) return cb(err)
 
-    self.User.findOrCreate({
-      id: result.id,
-      username: result.username
-    }, function (err, user) {
+    self._findOrCreateUser(result, function (err, user) {
       self._user = user
       return cb(err, user)
     })

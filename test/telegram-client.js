@@ -86,6 +86,7 @@ test('TelegramClient.startUpdatesPoll', function (t) {
 
 test('TelegramClient.sendMessage', function (t) {
   var text = "shabba ranks " + new Date().toISOString()
+
   client.sendMessage({
     recipient: TELEGRAM_TEST_USER_0,
     text: text
@@ -120,6 +121,7 @@ test('TelegramClient.sendPhoto', function (t) {
     t.ok(client.lastMessageSent)
     t.equal(client.lastMessageSent.id, message.id)
 
+    // ensure we can retrieve the message
     client.getMessage({
       id: message.id
     }, function (err) {
