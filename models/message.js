@@ -46,12 +46,12 @@ module.exports = function (connection) {
   })
 
   // provide access to largest media resolution by default
-  messageSchema.virtual('media.default').get(function () {
+  messageSchema.virtual('defaultMedia').get(function () {
     var largestWidth = null
     var largest = null
 
     if (this.media) {
-      this.media.map(function (photo) {
+      this.media.forEach(function (photo) {
         if (!largestWidth || photo.width > largestWidth) {
           largestWidth = photo.width
           largest = photo

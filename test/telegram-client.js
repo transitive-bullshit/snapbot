@@ -107,34 +107,39 @@ test('TelegramClient.sendMessage', function (t) {
 
 test('TelegramClient.sendPhoto', function (t) {
   var url = 'https://stickers.snaps.photo/development/workaholics/1427490067014-0869ff53-592d-40eb-8700-d71587e3595e.png'
-  var caption = 'second test'
+  var caption1 = 'first test'
+  var caption2 = 'second test'
 
   client.sendPhoto({
     recipient: TELEGRAM_TEST_USER_0,
-    mediaURL: url
+    mediaURL: url,
+    caption: caption1
   }, function (err, message) {
     t.notOk(err)
     t.ok(client.lastMessageSent)
     t.equal(client.lastMessageSent.id, message.id)
-    console.log('message', message)
 
     client.getMessage({
       id: message.id
     }, function (err) {
       t.notOk(err)
       t.ok(message.media.length)
-      t.equal(message.media.default.url, url)
-      t.equal(message.media.default.type, 'image')
+      t.ok(message.defaultMedia)
+      t.equal(message.caption, caption1)
+      t.equal(message.defaultMedia.url, url)
+      t.equal(message.defaultMedia.type, 'image')
 
       client.sendPhoto({
         recipient: TELEGRAM_TEST_USER_0,
-        mediaID: message.media.default.id,
-        caption: caption
+        mediaID: message.defaultMedia.id,
+        caption: caption2
       }, function (err, msg) {
         t.notOk(err)
         t.ok(msg)
-        t.equal(msg.caption, caption)
-        t.equal(msg.media.default.id, message.media.default.id)
+        t.ok(msg.media.length)
+        t.ok(msg.defaultMedia)
+        t.equal(msg.caption, caption2)
+        t.equal(msg.defaultMedia.id, message.defaultMedia.id)
         t.end()
       })
     })
