@@ -128,32 +128,6 @@ TelegramClient.prototype.stopUpdates = function (opts, cb) {
   process.nextTick(cb)
 }
 
-TelegramClient.prototype.getMe = function (opts, cb) {
-  var self = this
-
-  if (!self.client) {
-    return cb('auth error; requires signIn')
-  }
-
-  self.client.getMe(function (err, result) {
-    if (err) return cb(err)
-
-    self._findOrCreateUser(result, function (err, user) {
-      self._user = user
-      return cb(err, user)
-    })
-  })
-}
-
-TelegramClient.prototype.getUser = function (opts, cb) {
-  var self = this
-
-  // telegram bots can only interact with users they've encountered so far, so
-  // if the desired user isn't in the database, we don't have any way of
-  // querying the API for a user which may exist elsewhere.
-  ChatClient.prototype.getUser.call(self, opts, cb)
-}
-
 TelegramClient.prototype.sendMessage = function (opts, cb) {
   var self = this
 
@@ -235,6 +209,32 @@ TelegramClient.prototype.sendPhoto = function (opts, cb) {
   } else {
     throw new Error('TelegramClient.sendPhoto requires either opts.mediaURL or opts.mediaID')
   }
+}
+
+TelegramClient.prototype.getMe = function (opts, cb) {
+  var self = this
+
+  if (!self.client) {
+    return cb('auth error; requires signIn')
+  }
+
+  self.client.getMe(function (err, result) {
+    if (err) return cb(err)
+
+    self._findOrCreateUser(result, function (err, user) {
+      self._user = user
+      return cb(err, user)
+    })
+  })
+}
+
+TelegramClient.prototype.getUser = function (opts, cb) {
+  var self = this
+
+  // telegram bots can only interact with users they've encountered so far, so
+  // if the desired user isn't in the database, we don't have any way of
+  // querying the API for a user which may exist elsewhere.
+  ChatClient.prototype.getUser.call(self, opts, cb)
 }
 
 TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
