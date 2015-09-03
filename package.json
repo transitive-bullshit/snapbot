@@ -2,6 +2,7 @@
   "name": "snapbot",
   "description": "Platform Independent Chatbot Architecture",
   "version": "0.0.1",
+  "private": true,
   "author": {
     "name": "Travis Fischer",
     "email": "travis@makesnaps.com",
