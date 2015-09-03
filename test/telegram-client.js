@@ -41,7 +41,7 @@ test('TelegramClient.signIn', function (t) {
   })
 })
 
-/*test('TelegramClient.getUser(username)', function (t) {
+test('TelegramClient.getUser(username)', function (t) {
   client.getUser({
     username: client.username
   }, function (err, user) {
@@ -103,13 +103,14 @@ test('TelegramClient.sendMessage', function (t) {
       t.end()
     })
   })
-})*/
+})
 
 test('TelegramClient.sendPhoto', function (t) {
   var url = 'https://stickers.snaps.photo/development/workaholics/1427490067014-0869ff53-592d-40eb-8700-d71587e3595e.png'
   var caption1 = 'first test'
   var caption2 = 'second test'
 
+  // send photo by mediaURL
   client.sendPhoto({
     recipient: TELEGRAM_TEST_USER_0,
     mediaURL: url,
@@ -129,6 +130,7 @@ test('TelegramClient.sendPhoto', function (t) {
       t.equal(message.defaultMedia.url, url)
       t.equal(message.defaultMedia.type, 'image')
 
+      // send photo by mediaID
       client.sendPhoto({
         recipient: TELEGRAM_TEST_USER_0,
         mediaID: message.defaultMedia.id,
