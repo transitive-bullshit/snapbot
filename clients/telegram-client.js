@@ -92,7 +92,7 @@ TelegramClient.prototype._startListeningForUpdates = function () {
   self.client.on('message', function (message) {
     debug('TelegramClient:message %j', message)
 
-    self._findOrCreateMessage(message, function (err, message) {
+    self._findOrCreateMessage(message, null, function (err, message) {
       if (err) {
         self.emit('error', err)
       } else {
@@ -166,9 +166,9 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
     {
       name: 'opts',
       fields: {
-        recipient: self.User,
+        recipient: String,
         replyToMessage: {
-          type: self.Message,
+          type: String,
           required: false
         },
         text: String
@@ -176,9 +176,9 @@ TelegramClient.prototype.sendMessage = function (opts, cb) {
     }
   ])
 
-  self._sendMessage(self.client.sendPhoto, {
-    'chat_id': opts.recipient.id,
-    'reply_to_message_id': opts.replyToMessage && opts.replyToMessage.id,
+  self._sendMessage(self.client.sendMessage, {
+    'chat_id': opts.recipient,
+    'reply_to_message_id': opts.replyToMessage,
     'text': opts.text
   }, opts, cb)
 }
@@ -190,9 +190,9 @@ TelegramClient.prototype.sendPhoto = function (opts, cb) {
     {
       name: 'opts',
       fields: {
-        recipient: self.User,
+        recipient: String,
         replyToMessage: {
-          type: self.Message,
+          type: String,
           required: false
         },
         caption: {
@@ -212,8 +212,8 @@ TelegramClient.prototype.sendPhoto = function (opts, cb) {
   ])
 
   var params = {
-    'chat_id': opts.recipient.id,
-    'reply_to_message_id': opts.replyToMessage && opts.replyToMessage.id,
+    'chat_id': opts.recipient,
+    'reply_to_message_id': opts.replyToMessage,
     'caption': opts.caption,
     'file_id': opts.mediaID
   }
@@ -238,7 +238,7 @@ TelegramClient.prototype.sendPhoto = function (opts, cb) {
     // send message with pre-existing media
     _sendMessage()
   } else {
-    throw new Error('TelegramClient.sendMessage requires either opts.mediaURL or opts.mediaID')
+    throw new Error('TelegramClient.sendPhoto requires either opts.mediaURL or opts.mediaID')
   }
 }
 
@@ -249,20 +249,18 @@ TelegramClient.prototype._sendMessage = function (method, params, opts, cb) {
     return cb('auth error; requires signIn')
   }
 
-  var replyToMessage = opts.replyToMessage || { }
-
   method.call(self.client, params, function (err, result) {
     if (err) return cb(err)
 
     self.assert.equal(result.from.id, self._user.id)
-    self.assert.equal(result.chat.id, opts.recipient.id)
+    self.assert.equal(result.chat.id, opts.recipient)
     self.assert.equal(result.text, opts.text)
 
-    if (replyToMessage.id) {
-      self.assert.equal(result['reply_to_message'].id, replyToMessage.id)
+    if (opts.replyToMessage) {
+      self.assert.equal(result['reply_to_message'].id, opts.replyToMessage)
     }
 
-    self._findOrCreateMessage(result, function (err, message) {
+    self._findOrCreateMessage(result, opts, function (err, message) {
       if (!err) {
         self._lastMessageSent = message
       }
@@ -301,8 +299,9 @@ TelegramClient.prototype._findOrCreateUser = function (user, cb) {
   })
 }
 
-TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
+TelegramClient.prototype._findOrCreateMessage = function (message, opts, cb) {
   var self = this
+  opts = opts || { }
 
   async.parallel([
     function (cb) {
@@ -331,19 +330,26 @@ TelegramClient.prototype._findOrCreateMessage = function (message, cb) {
           sender: message.from.id,
           replyToMessage: replyToMessage,
           text: message.text,
-          created: new Date(message.date * 1000)
+          created: new Date(message.date * 1000),
+          caption: message.caption
         }
 
         if (message.photo) {
           messageParams.media = message.photo.map(function (photo) {
             self.assert(photo['file_id'])
 
-            return {
+            var image = {
               id: photo['file_id'],
               type: 'image',
               width: photo.width,
               height: photo.height
             }
+
+            if (opts.mediaURL) {
+              image.url = opts.mediaURL
+            }
+
+            return image
           })
         }
 

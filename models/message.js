@@ -12,7 +12,7 @@ module.exports = function (connection) {
     sender: { type: String },
 
     // recipient(s) of this message
-    recipients: [ { type: String } ],
+    // recipients: [ { type: String } ],
 
     // reference to the original message this message is in response to (optional)
     replyToMessage: { type: String },
@@ -43,6 +43,23 @@ module.exports = function (connection) {
     ],
 
     created: { type: Date, index: true }
+  })
+
+  // provide access to largest media resolution by default
+  messageSchema.virtual('media.default').get(function () {
+    var largestWidth = null
+    var largest = null
+
+    if (this.media) {
+      this.media.map(function (photo) {
+        if (!largestWidth || photo.width > largestWidth) {
+          largestWidth = photo.width
+          largest = photo
+        }
+      })
+    }
+
+    return largest
   })
 
   return connection.model('Message', messageSchema)
