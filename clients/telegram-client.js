@@ -16,6 +16,7 @@ inherits(TelegramClient, ChatClient)
 
 /**
  * TelegramClient
+ * @see https://core.telegram.org/bots/api for API details.
  *
  * @class
  * @param {Object} opts
