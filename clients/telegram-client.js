@@ -18,6 +18,22 @@ inherits(TelegramClient, ChatClient)
  * TelegramClient
  * @see https://core.telegram.org/bots/api for API details.
  *
+ * Fully supported:
+ * - getMe
+ * - getUpdates
+ * - sendMessage
+ * - sendPhoto
+ *
+ * Unsupported:
+ * - forwardMessage
+ * - sendSticker (@todo)
+ * - sendVideo (@todo)
+ * - sendVoice
+ * - sendLocation
+ * - sendChatAction (@todo)
+ * - getUserProfilePhotos (@todo)
+ * - setWebhook (@todo)
+ *
  * @class
  * @param {Object} opts
  */
