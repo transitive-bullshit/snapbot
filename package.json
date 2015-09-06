@@ -5,11 +5,11 @@
   "private": true,
   "author": {
     "name": "Travis Fischer",
-    "email": "travis@makesnaps.com",
-    "url": "https://makesnaps.com"
+    "email": "fisch0920@gmail.com",
+    "url": "https://github.com/fisch0920"
   },
   "bugs": {
-    "url": "https://github.com/SnapsApp/snapbot/issues"
+    "url": "https://github.com/fisch0920/snapbot/issues"
   },
   "dependencies": {
     "async": "^1.4.2",
@@ -40,7 +40,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/SnapsApp/snapbot.git"
+    "url": "git://github.com/fisch0920/snapbot.git"
   },
   "scripts": {
     "test": "standard && tape test/*.js",

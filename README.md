@@ -1,6 +1,6 @@
 # Snapbot
 
-### Snaps chatbot platform
+### Cross-platform chatbots
 
 Snapbot provides common infrastructure and abstractions for creating chatbots that work across multiple chat platforms.
 
@@ -36,4 +36,4 @@ var bot = new TestBot(client)
 
 ### License
 
-MIT. Copyright (c) [Snaps](https://makesnaps.com).
+MIT. Copyright (c) [Travis Fischer](https://github.com/fisch0920).
